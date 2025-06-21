@@ -17,8 +17,12 @@ jobs:
     # Запуск контейнера в фоне
     - name: Run app container
       run: docker run -d --name app -p 5000:5000 ${{ env.IMAGE_NAME }}
-
-    # DAST: OWASP ZAP (ждем запуска приложения)
+    - name: Wait for application to start
+       run: |
+         # Ждем пока приложение станет доступно
+         docker exec app bash -c 'while ! curl -sSf http://localhost:5000 >/dev/null; do sleep 2; done'
+         echo "Application is ready!"
+         # DAST: OWASP ZAP (ждем запуска приложения)
     - name: DAST Scan (ZAP)
       uses: zaproxy/action-full-scan@v0.7.0
       with:
