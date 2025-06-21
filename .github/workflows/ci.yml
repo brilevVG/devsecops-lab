@@ -1,12 +1,21 @@
-name: CI Pipeline
+name: SonarQube Scan
+
 on: [push]
+
 jobs:
   sonar-scan:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@master
-        env:
-          SONAR_TOKEN: ${env.SONAR_TOKEN}
-          SONAR_HOST_URL: ${env.SONAR_HOST_URL}  # Для прода: заменить на ваш сервер
+        with:
+          args: >
+            -Dsonar.projectKey=WebGoat
+            -Dsonar.projectName=My_Project
+            -Dsonar.sources=src
+            -Dsonar.host.url=${{ env.SONAR_HOST_URL }}
+            -Dsonar.login=${{ env.SONAR_TOKEN }}
+            -Dsonar.verbose=true
+            -Dsonar.forceAuthentication=true
