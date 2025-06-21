@@ -18,7 +18,7 @@ jobs:
     - name: Run app container
       run: docker run -d --name app -p 5000:5000 ${{ env.IMAGE_NAME }}
     - name: Wait for application to start
-       run: |
+      run: |
          # Ждем пока приложение станет доступно
          docker exec app bash -c 'while ! curl -sSf http://localhost:5000 >/dev/null; do sleep 2; done'
          echo "Application is ready!"
