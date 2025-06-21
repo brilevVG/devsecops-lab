@@ -1,9 +1,8 @@
+import subprocess
 import os
-
-# Уязвимость: команда с пользовательским вводом
-def execute_command():
-    user_input = input("Enter command: ")
-    os.system(user_input)  # HIGH RISK: Command Injection
+def safe_execute(command):
+    subprocess.run([command], shell=False)  # Безопасный вызов
 
 # Уязвимость: хардкод пароля
-DB_PASSWORD = "admin123!"  # HIGH RISK: Hardcoded secret
+
+DB_PASSWORD = os.getenv("DB_PASS")  # Безопасное хранение
