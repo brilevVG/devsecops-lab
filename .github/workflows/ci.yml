@@ -8,5 +8,5 @@ jobs:
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@master
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_TOKEN: ${{ SONAR_TOKEN }}
           SONAR_HOST_URL: https://user311046463-wy6bad35.tunnel.vk-apps.com/  # Для прода: заменить на ваш сервер
