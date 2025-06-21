@@ -6,17 +6,14 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      continue-on-error: true
     # SAST: Bandit
     - name: SAST Scan (Bandit)
-      continue-on-error: true
       run: |
         pip install bandit
         bandit -r . --severity-level high --confidence-level high
         
     # Security Scan (Trivy) - из Модуля 1
     - name: Container Scan (Trivy)
-      continue-on-error: true
       uses: aquasecurity/trivy-action@master
       with:
         scan-type: 'fs'
