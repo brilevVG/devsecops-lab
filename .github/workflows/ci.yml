@@ -7,15 +7,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@master
-        with:
-          args: >
-            -Dsonar.projectKey=WebGoat
-            -Dsonar.projectName=My_Project
-            -Dsonar.sources=src
-            -Dsonar.host.url=${{ env.SONAR_HOST_URL }}
-            -Dsonar.login=${{ env.SONAR_TOKEN }}
-            -Dsonar.verbose=true
-            -Dsonar.forceAuthentication=true
+        env:
+          SONAR_TOKEN: sqp_97087f737c9ad77b64cb800d770a62faf26b63d8
+          SONAR_HOST_URL: https://user311046463-wy6bad35.tunnel.vk-apps.com/  # Для прода: заменить на ваш сервер
