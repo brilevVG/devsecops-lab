@@ -3,11 +3,6 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
-    services:
-      web:
-        image: github_network_b2ff638419604b8b8abf3971ecb2d5f1  # Замени после сборки
-        ports:
-          - 5000:5000
 
     steps:
     - name: Checkout code
