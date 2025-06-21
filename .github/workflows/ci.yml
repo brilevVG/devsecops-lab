@@ -16,11 +16,11 @@ jobs:
 
     # Запуск контейнера в фоне
     - name: Run app container
-      run: docker run -d --name app -p 5000:5000 ${{ env.IMAGE_NAME }}
+      run: docker start devsecops-app
     - name: Wait for application to start
       run: |
          # Ждем пока приложение станет доступно
-         docker exec app bash -c 'while ! curl -sSf http://localhost:5000 >/dev/null; do sleep 2; done'
+         docker exec devsecops-app bash -c 'while ! curl -sSf http://localhost:5000 >/dev/null; do sleep 2; done'
          echo "Application is ready!"
          # DAST: OWASP ZAP (ждем запуска приложения)
     - name: DAST Scan (ZAP)
@@ -38,4 +38,4 @@ jobs:
 
     # Останавливаем контейнер
     - name: Stop container
-      run: docker stop app || true
+      run: docker stop devsecops-app || true
