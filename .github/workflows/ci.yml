@@ -3,22 +3,40 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
+    services:
+      web:
+        image: 643218d9aba7  # Замени после сборки
+        ports:
+          - 5000:5000
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-    # SAST: Bandit
-    - name: SAST Scan (Bandit)
+      
+    # Сборка образа
+    - name: Build Docker image
       run: |
-        pip install bandit
-        bandit -r . --severity-level high --confidence-level high
-        
-    # Security Scan (Trivy) - из Модуля 1
-    - name: Container Scan (Trivy)
-      uses: aquasecurity/trivy-action@master
+        docker build -t devsecops-app .
+        echo "IMAGE_NAME=devsecops-app" >> $GITHUB_ENV
+
+    # Запуск контейнера в фоне
+    - name: Run app container
+      run: docker run -d --name app -p 5000:5000 ${{ env.IMAGE_NAME }}
+
+    # DAST: OWASP ZAP (ждем запуска приложения)
+    - name: DAST Scan (ZAP)
+      uses: zaproxy/action-full-scan@v0.7.0
       with:
-        scan-type: 'fs'
-    # Secrets Detection
-    - name: Secrets Scan (TruffleHog)
-      uses: trufflesecurity/trufflehog@main
+        target: 'http://localhost:5000'
+        rules: 'rules/risk-3'  # Только критические уязвимости
+
+    # IaC Security: Checkov (Dockerfile, Terraform)
+    - name: IaC Scan (Checkov)
+      uses: bridgecrewio/checkov-action@v12
       with:
-        args: '--regex --entropy=False --max_depth=1 .'
+        directory: .
+        skip_check: CKV_DOCKER_2  # Пропускаем "root user" для демо
+
+    # Останавливаем контейнер
+    - name: Stop container
+      run: docker stop app || true
