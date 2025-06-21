@@ -3,11 +3,6 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
-    services:
-      app:  # Добавляем сервис для правильной работы сети
-        image: devsecops-app
-        ports:
-          - 5000:5000
 
     steps:
     - name: Checkout code
@@ -16,26 +11,27 @@ jobs:
     # Сборка образа
     - name: Build Docker image
       run: docker build -t devsecops-app .
-
-    # Запуск контейнера в фоне с явным именем
+      
+    # Запуск контейнера с пробросом портов
     - name: Run app container
       run: |
-        docker run -d --name running-app -p 5000:5000 devsecops-app
-
+        docker run -d --name devsecops-app-container -p 5000:5000 devsecops-app
+        
     # Ожидание запуска приложения
     - name: Wait for application to start
       run: |
+        # Ждем пока приложение станет доступно
         echo "Waiting for app to start..."
-        docker logs running-app  # Покажем логи для отладки
-        timeout 60 bash -c 'while ! docker exec running-app curl -s http://localhost:5000; do sleep 2; done'
+        docker logs devsecops-app-container  # Для отладки
+        timeout 30 bash -c 'while ! curl -s http://localhost:5000 >/dev/null; do sleep 2; done'
         echo "Application is ready!"
-
+        
     # DAST: OWASP ZAP
     - name: DAST Scan (ZAP)
       uses: zaproxy/action-full-scan@v0.7.0
       with:
-        target: 'http://localhost:5000'  # Для GitHub Actions services
-        cmd_options: '--network host'    # Критически важно!
+        target: 'http://localhost:5000'
+        cmd_options: '--network host'  # Ключевое исправление!
         rules: 'rules/risk-3'
 
     # IaC Security: Checkov
@@ -47,4 +43,6 @@ jobs:
 
     # Останавливаем контейнер
     - name: Stop container
-      run: docker stop running-app || true
+      run: |
+        docker stop devsecops-app-container || true
+        docker rm devsecops-app-container || true
